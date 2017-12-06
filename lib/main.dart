@@ -1,27 +1,14 @@
 import 'package:telegrambot/telegrambot.dart';
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:math';
+
 
 Future<dynamic> main(List<String> args) async {
   print(io.Directory.current);
   var token = new io.File('token.txt').readAsStringSync();
-  var bot = new TelegramBot(token);
-  var updates = pollForUpdates(bot);
-
-  await for (var update in updates) {
-//    if (update.inlineQuery != null) {
-//      handleInlineQuery(bot, update.inlineQuery);
-//    }
-    if (update.message != null) {
-      handleMessage(bot, update.message);
-    }
-  }
-}
-
-void handleMessage(TelegramBot bot, Message message) {
-  var out = message.text.split(' ').map((x) => x + huify(x));
-  bot.sendCommand(new SendMessage.plainText(message.chat.id,
-      out.join(" ")));
+  var app = new Application(token);
+  app.start();
 }
 
 String huify(String s) {
@@ -30,18 +17,70 @@ String huify(String s) {
     return s.replaceFirstMapped(regexp, (m) {
       switch (m.group(1)) {
         case 'а':
-          return '-хуя';
+          return 'хуя';
         case 'о':
-          return '-хуё';
+          return 'хуё';
         case 'у':
-          return '-хую';
+          return 'хую';
         case 'э':
-          return '-хуе';
+          return 'хуе';
         default:
-          return '-ху' + m.group(1);
+          return 'ху' + m.group(1);
       }
     });
   } else {
     return '';
+  }
+}
+
+class Application {
+  TelegramBot bot;
+  Stream<Update> updates;
+  int probability = 100;
+
+  Application(String token) {
+    bot = new TelegramBot(token);
+    updates = pollForUpdates(bot);
+  }
+
+  Future<dynamic> start() async {
+    await for (var update in updates) {
+      if (update.message != null) {
+        handleMessage(bot, update.message);
+      }
+    }
+  }
+
+  void handleMessage(TelegramBot bot, Message message) {
+    if (message.text.startsWith('/hueroyatnost') && message.text
+        .split(' ')
+        .length > 1) {
+      var s = message.text.split(' ')[1];
+      var n = int.parse(s, onError: (e) => null);
+      if (n >= 0 && n <= 100) {
+        probability = n;
+        bot.sendCommand(new SendMessage.plainText(message.chat.id,
+            "Хуероятность теперь = " + s + "%"));
+      } else {
+        bot.sendCommand(new SendMessage.plainText(message.chat.id,
+            "Хуёвая вероятность, давай по-новой!"));
+      }
+    } else {
+      var rng = new Random();
+      final regexp = new RegExp('[.,\/#!\$%\^&\*;:{}=\-_`~()—]');
+      if (rng.nextInt(100) <= probability) {
+        var out = message.text.split(' ').map((x) {
+          if (x.length < 3) {
+            return x;
+          } else {
+            var s = x.replaceAll(regexp, '');
+            return s + '-' + huify(x);
+          }
+        });
+        bot.sendCommand(new SendMessage.plainText(message.chat.id,
+            out.join(" "))
+        );
+      }
+    }
   }
 }

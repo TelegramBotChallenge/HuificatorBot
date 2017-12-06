@@ -5,8 +5,7 @@ import 'dart:math';
 
 
 Future<dynamic> main(List<String> args) async {
-  print(io.Directory.current);
-  var token = new io.File('token.txt').readAsStringSync();
+  var token = io.Platform.environment['BOT_TOKEN'];
   var app = new Application(token);
   app.start();
 }

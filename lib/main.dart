@@ -45,7 +45,7 @@ class Application {
 
   Future<dynamic> start() async {
     await for (var update in updates) {
-      if (update.message != null) {
+      if (update.message != null && update.message.text != null) {
         handleMessage(bot, update.message);
       }
     }
@@ -67,13 +67,17 @@ class Application {
       }
     } else {
       var rng = new Random();
-      final regexp = new RegExp('[.,\/#!\$%\^&\*;:{}=\-_`~()—]');
+      final regexp = new RegExp('[.,\/#!\$%\^&\*;:{}=\-`~()—]');
       if (rng.nextInt(100) <= probability) {
-        var out = message.text.split(' ').map((x) {
+        var out = message.text.toLowerCase().split(' ').map((x) {
           if (x.length < 3) {
             return x;
           } else {
             var s = x.replaceAll(regexp, '');
+            var huified = huify(x);
+            if (huified == x) {
+              return x;
+            }
             return s + '-' + huify(x);
           }
         });

@@ -15,3 +15,4 @@ dev_dependencies:
 
 dependencies:
   telegrambot: "^0.1.0"
+  postgres: "^0.9.6"

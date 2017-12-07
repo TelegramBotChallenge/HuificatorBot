@@ -7,7 +7,7 @@ import 'package:postgres/postgres.dart';
 
 Future<dynamic> main(List<String> args) async {
   print(io.Directory.current);
-  var token = new io.File('token.txt').readAsStringSync();
+  var token = io.Platform.environment['BOT_TOKEN'];
   var dbSettings = new io.File('db.txt').readAsLinesSync().map((s) =>
   s.split('=')[1]).toList();
   var app = new Application(

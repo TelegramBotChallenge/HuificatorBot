@@ -111,7 +111,7 @@ class Application {
         .length > 1) {
       var s = message.text.split(' ')[1];
       var n = int.parse(s, onError: (e) => null);
-      if (n >= 0 && n <= 100) {
+      if (n != null && n >= 0 && n <= 100) {
         updateProbability(connection, n, message.chat.id);
         bot.sendCommand(new SendMessage.plainText(message.chat.id,
             "Хуероятность теперь = " + s + "%"));

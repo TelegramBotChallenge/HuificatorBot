@@ -1,0 +1,9 @@
+telegram:
+  token: 'yourtoken'
+
+db:
+  host: yourhost
+  port: yourport
+  database: dbname
+  username: dbuser
+  password: dbpassword

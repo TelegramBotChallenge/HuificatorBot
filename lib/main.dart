@@ -3,15 +3,20 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:math';
 import 'package:postgres/postgres.dart';
+import 'package:args/args.dart';
+import 'package:yaml/yaml.dart';
 
 
 Future<dynamic> main(List<String> args) async {
-  print(io.Directory.current);
-  var token = io.Platform.environment['BOT_TOKEN'];
-  var dbSettings = new io.File('db.txt').readAsLinesSync().map((s) =>
-  s.split('=')[1]).toList();
-  var app = new Application(
-      token, dbSettings);
+  // Parse command line arguments
+  final parser = new ArgParser()
+    ..addOption('config', abbr: 'c');
+  ArgResult argResults = parser.parse(args);
+  print('Path to config: ' + argResults['config']);
+
+  var config = loadYaml(new io.File(argResults['config']).readAsStringSync());
+  
+  var app = new Application(config);
   app.start();
 }
 
@@ -47,14 +52,14 @@ class Application {
   String username;
   String password;
 
-  Application(String token, List<String> dbSettings) {
-    bot = new TelegramBot(token);
+  Application(config) {
+    bot = new TelegramBot(config['telegram']['token']);
     updates = pollForUpdates(bot);
-    host = dbSettings[0];
-    port = int.parse(dbSettings[1]);
-    table = dbSettings[2];
-    username = dbSettings[3];
-    password = dbSettings[4];
+    host = config['db']['host'];
+    port = config['db']['port'];
+    table = config['db']['database'];
+    username = config['db']['username'];
+    password = config['db']['password'];
   }
 
   Future<dynamic> start() async {
